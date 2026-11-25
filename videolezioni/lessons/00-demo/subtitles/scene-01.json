@@ -1,0 +1,37 @@
+{
+  "duration": 30.0,
+  "segments": [
+    {
+      "start": 0.2, "end": 7.4,
+      "text": "Benvenuto in Lectio Framework. Questo è un capitolo dimostrativo pronto all'uso per verificare subito il motore grafico, i quattro temi e l'avatar Lia.",
+      "words": [
+        {"text":"Benvenuto","start":0.2,"end":0.7},{"text":"in","start":0.7,"end":0.9},{"text":"Lectio","start":0.9,"end":1.4},{"text":"Framework.","start":1.4,"end":2.0},
+        {"text":"Questo","start":2.2,"end":2.6},{"text":"è","start":2.6,"end":2.7},{"text":"un","start":2.7,"end":2.9},{"text":"capitolo","start":2.9,"end":3.4},{"text":"dimostrativo","start":3.4,"end":4.1},
+        {"text":"pronto","start":4.1,"end":4.5},{"text":"all'uso","start":4.5,"end":4.9},{"text":"per","start":4.9,"end":5.1},{"text":"verificare","start":5.1,"end":5.6},{"text":"subito","start":5.6,"end":6.0},
+        {"text":"il","start":6.0,"end":6.1},{"text":"motore","start":6.1,"end":6.5},{"text":"grafico,","start":6.5,"end":6.9},{"text":"i","start":6.9,"end":7.0},{"text":"quattro","start":7.0,"end":7.2},{"text":"temi","start":7.2,"end":7.4}
+      ]
+    },
+    {
+      "start": 7.8, "end": 18.4,
+      "text": "Invece di registrare video fissi, ogni scena combina slide HTML, grafici SVG e formule KaTeX come f di x uguale a x al quadrato più b.",
+      "words": [
+        {"text":"Invece","start":7.8,"end":8.2},{"text":"di","start":8.2,"end":8.4},{"text":"registrare","start":8.4,"end":9.0},{"text":"video","start":9.0,"end":9.4},{"text":"fissi,","start":9.4,"end":9.9},
+        {"text":"ogni","start":10.0,"end":10.3},{"text":"scena","start":10.3,"end":10.7},{"text":"combina","start":10.7,"end":11.2},{"text":"slide","start":11.2,"end":11.6},{"text":"HTML,","start":11.6,"end":12.0},
+        {"text":"grafici","start":12.1,"end":12.6},{"text":"SVG","start":12.6,"end":13.0},{"text":"e","start":13.0,"end":13.1},{"text":"formule","start":13.1,"end":13.7},{"text":"KaTeX","start":13.7,"end":14.2},
+        {"text":"come","start":14.3,"end":14.6},{"text":"f","start":14.7,"end":15.0},{"text":"di","start":15.0,"end":15.2},{"text":"x","start":15.2,"end":15.6},{"text":"uguale","start":15.7,"end":16.1},
+        {"text":"a","start":16.2,"end":16.4},{"text":"x","start":16.4,"end":16.8},{"text":"al","start":16.8,"end":17.0},{"text":"quadrato","start":17.0,"end":17.6},{"text":"più","start":17.7,"end":18.0},{"text":"b.","start":18.0,"end":18.4}
+      ]
+    },
+    {
+      "start": 18.8, "end": 29.6,
+      "text": "Per creare il tuo corso ti basta mettere i tuoi PDF o le slide nella cartella sources e chiedere alla tua IA di guidarti passo dopo passo.",
+      "words": [
+        {"text":"Per","start":18.8,"end":19.1},{"text":"creare","start":19.1,"end":19.6},{"text":"il","start":19.6,"end":19.8},{"text":"tuo","start":19.8,"end":20.1},{"text":"corso","start":20.1,"end":20.6},
+        {"text":"ti","start":20.6,"end":20.8},{"text":"basta","start":20.8,"end":21.3},{"text":"mettere","start":21.3,"end":21.8},{"text":"i","start":21.8,"end":21.9},{"text":"tuoi","start":21.9,"end":22.3},
+        {"text":"PDF","start":22.3,"end":22.8},{"text":"o","start":22.8,"end":23.0},{"text":"le","start":23.0,"end":23.2},{"text":"slide","start":23.2,"end":23.7},{"text":"nella","start":23.7,"end":24.1},
+        {"text":"cartella","start":24.1,"end":24.7},{"text":"sources","start":24.7,"end":25.3},{"text":"e","start":25.3,"end":25.5},{"text":"chiedere","start":25.5,"end":26.1},{"text":"alla","start":26.1,"end":26.4},
+        {"text":"tua","start":26.4,"end":26.8},{"text":"IA","start":26.8,"end":27.2},{"text":"di","start":27.2,"end":27.4},{"text":"guidarti","start":27.4,"end":28.2},{"text":"passo","start":28.2,"end":28.7},{"text":"dopo","start":28.7,"end":29.1},{"text":"passo.","start":29.1,"end":29.6}
+      ]
+    }
+  ]
+}

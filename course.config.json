@@ -1,0 +1,47 @@
+{
+  "slug": "my-course",
+  "title": "Il Mio Corso",
+  "subtitle": "Videolezioni Interattive",
+  "eyebrow": ["Università / Istituzione", "Codice Corso", "Anno Accademico"],
+  "language": "it",
+  "default_theme": "studio",
+  "tutor_avatar": {
+    "enabled": true,
+    "name": "Lia"
+  },
+  "author": {
+    "name": "Il Tuo Nome",
+    "label_prefix": "Appunti di",
+    "github_username": "",
+    "avatar": ""
+  },
+  "professor": {
+    "name": "",
+    "role": "Docente del corso",
+    "url": "",
+    "avatar": ""
+  },
+  "github": {
+    "repo": "",
+    "pages_url": "",
+    "show_star_button": true,
+    "enable_issue_reporter": true
+  },
+  "search": {
+    "suggested_queries": [
+      "teorema",
+      "algoritmo",
+      "esempio",
+      "formula",
+      "definizione"
+    ]
+  },
+  "tts": {
+    "provider": "gemini",
+    "model": "gemini-2.5-flash-preview-tts",
+    "voice_name": "Kore",
+    "style": "chiaro, didattico, calmo e preciso, stile lezione universitaria divulgativa",
+    "budget_eur": 5.0
+  },
+  "math_macros": {}
+}

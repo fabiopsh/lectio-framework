@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="studio">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#F6F6F3" />
+  <title>Videolezioni Interattive — Lectio</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-lia.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@1,6..72,500;1,6..72,600&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+</head>
+<body>
+  <main class="catalog-shell">
+    <header class="catalog-hero">
+      <div class="hero-top-row">
+        <div id="hero-eyebrow" class="hero-eyebrow">
+          <span>Corso Universitario</span>
+          <span class="hero-sep" aria-hidden="true">/</span>
+          <span>Videolezioni Interattive</span>
+        </div>
+        <div id="catalog-theme-switcher"></div>
+      </div>
+
+      <div class="hero-main-grid">
+        <div class="hero-left-col">
+          <h1 id="hero-title" class="hero-title">Il Mio Corso</h1>
+
+          <div id="hero-credits-row" class="hero-credits-row" hidden></div>
+          <div id="hero-prof-row" class="hero-prof-row" hidden></div>
+
+          <div class="hero-stats">
+            <span class="stat-chip"><strong id="stat-hours">--</strong> di lezioni</span>
+            <span class="stat-chip"><strong id="stat-completed-hours">0 min</strong> completate</span>
+            <span class="stat-chip"><strong id="stat-completed-pct">0%</strong> del percorso</span>
+          </div>
+        </div>
+
+        <a id="resume-card" class="resume-card resume-card-with-lia" href="lesson.html?id=00-demo">
+          <div class="resume-card-body">
+            <span id="resume-kicker" class="resume-kicker">Inizia il percorso</span>
+            <h2 id="resume-title" class="resume-title">Caricamento...</h2>
+            <span id="resume-meta" class="resume-meta">Seleziona un capitolo dalla mappa o dalla griglia</span>
+            <span id="resume-cta" class="resume-cta">
+              <span>Avvia lezione</span>
+              <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+            </span>
+          </div>
+          <div id="hero-lia-stage" class="hero-lia-stage" aria-hidden="true">
+            <div id="hero-lia-sprite" class="hero-lia-sprite"></div>
+          </div>
+        </a>
+      </div>
+    </header>
+
+    <div class="catalog-toolbar-v2">
+      <div class="toolbar-left">
+        <div class="view-switcher" role="tablist" aria-label="Modalità di visualizzazione">
+          <button class="view-btn active" data-view="map">
+            <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18H14a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h5.5"/></svg>
+            <span>Mappa del Corso</span>
+          </button>
+          <button class="view-btn" data-view="bento">
+            <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            <span>Griglia Bento</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="toolbar-right">
+        <div class="search-box">
+          <svg class="search-icon ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input id="catalog-search" class="search-input" type="search" placeholder="Filtra capitoli o premi Ctrl+K per tutte le scene…" aria-label="Cerca capitoli" />
+          <button id="btn-global-search-home" class="search-kbd-btn" type="button" title="Ricerca globale in tutte le scene (Ctrl+K)" aria-label="Apri ricerca globale">
+            <kbd>Ctrl</kbd><kbd>K</kbd>
+          </button>
+        </div>
+        <div class="progress-summary">
+          <span id="study-progress-label">0 min / --</span>
+          <div class="progress-track"><div id="study-progress-fill" class="progress-fill" style="width: 0%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="catalog-content"></div>
+  </main>
+
+  <script type="module" src="js/catalog.js"></script>
+</body>
+</html>

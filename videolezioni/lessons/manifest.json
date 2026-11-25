@@ -1,0 +1,29 @@
+{
+  "course": {
+    "title": "Il Mio Corso",
+    "code": "DEMO",
+    "university": "Lectio Framework",
+    "academic_year": "2026/27",
+    "professor": ""
+  },
+  "parts": [
+    {
+      "id": "parte-0",
+      "label": "Starter Demo",
+      "title": "Esempio funzionante (sostituiscimi con i tuoi capitoli)"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "00-demo",
+      "chapter": 0,
+      "part": "parte-0",
+      "icon": "roadmap",
+      "title": "Benvenuto in Lectio Framework",
+      "summary": "Scena dimostrativa con sincronizzazione voce-formule KaTeX, highlight granulari, Lia e ricerca Ctrl+K.",
+      "status": "ready",
+      "scenes_count": 2,
+      "duration_min": 1
+    }
+  ]
+}

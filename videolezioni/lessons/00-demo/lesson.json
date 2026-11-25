@@ -1,0 +1,49 @@
+{
+  "lesson_id": "00-demo",
+  "chapter": 0,
+  "part": "Starter Demo",
+  "title": "Benvenuto in Lectio Framework",
+  "voice_config": {
+    "provider": "gemini",
+    "model": "gemini-2.5-flash-preview-tts",
+    "voice_name": "Kore",
+    "style": "chiaro, didattico, calmo e preciso"
+  },
+  "scenes": [
+    {
+      "id": "scene-01",
+      "section": "0.1 · Come funziona Lectio",
+      "title": "Da PDF o slide a videolezioni sincronizzate",
+      "tts_text": "Benvenuto in Lectio Framework. Questo è un capitolo dimostrativo pronto all'uso per verificare subito il motore grafico, i quattro temi e l'avatar Lia. [pause:0.5] Invece di registrare video fissi, ogni scena combina slide HTML, grafici SVG e formule KaTeX come f di x uguale a x al quadrato più b. [pause:0.5] Per creare il tuo corso ti basta mettere i tuoi PDF o le slide nella cartella sources e chiedere alla tua IA di guidarti passo dopo passo.",
+      "slide_html": "\n<div class=\"slide-card\">\n  <div class=\"slide-kicker\">0.1 · Starter Demo</div>\n  <h2 class=\"slide-title\">Da PDF o slide a videolezioni interattive</h2>\n  <div id=\"s1\" class=\"box box-primary cue-hidden\">\n    <div class=\"box-label\">Come funziona il player</div>\n    <ol class=\"algo-list\">\n      <li id=\"d1-1\"><strong>Zero video MP4</strong>: HTML, SVG e formule KaTeX renderizzati live nel browser.</li>\n      <li id=\"d1-2\"><strong>Sincronizzazione atomo per atomo</strong>: es. \\(\\htmlId{f-demo}{f(x) = a x^2 + b}\\) si illumina al ritmo della voce.</li>\n      <li id=\"d1-3\"><strong>Pronto per l'IA</strong>: metti i PDF in <code>sources/</code> e avvia la chat con Claude Code, Antigravity o Codex.</li>\n    </ol>\n  </div>\n  <div id=\"s2\" class=\"box box-idea cue-hidden\">\n    <div class=\"box-label\">Provalo subito</div>\n    <p>Cambia tema in alto a destra (<code>Studio</code>, <code>Carbon</code>, <code>Liquid Glass</code>, <code>16-bit</code>) oppure premi <strong>Ctrl+K</strong> per testare la ricerca globale.</p>\n  </div>\n</div>\n",
+      "cues": [
+        { "at": 2.4, "action": "show", "target": "#s1", "anchor": "capitolo dimostrativo" },
+        { "at": 7.8, "action": "highlight", "target": "#d1-1", "duration": 4.2, "anchor": "Invece di registrare video fissi" },
+        { "at": 12.1, "action": "highlight", "target": "#d1-2", "duration": 6.4, "anchor": "formule KaTeX come f di x" },
+        { "at": 18.8, "action": "highlight", "target": "#d1-3", "duration": 5.5, "anchor": "metti i tuoi PDF" },
+        { "at": 24.4, "action": "show", "target": "#s2", "anchor": "guidarti passo dopo passo" },
+        { "at": 24.5, "action": "highlight", "target": "#s2", "duration": 5.2, "anchor": "guidarti passo dopo passo" }
+      ],
+      "audio_file": "audio/scene-01.wav",
+      "subtitle_file": "subtitles/scene-01.json",
+      "duration_sec": 30.0
+    },
+    {
+      "id": "scene-02",
+      "section": "0.2 · Pipeline automatica",
+      "title": "Dalla sorgente al deploy su GitHub Pages",
+      "tts_text": "La pipeline di Lectio automatizza tutto ciò che è ripetitivo con script locali a zero token. [pause:0.5] Prima ingest.py estrae i testi dai tuoi PDF o slide, poi l'IA genera le scene, quindi gli script generano l'audio TTS, allineano i sottotitoli parola per parola, rifiniscono gli highlight e pubblicano il sito statico su GitHub Pages.",
+      "slide_html": "\n<div class=\"slide-card\">\n  <div class=\"slide-kicker\">0.2 · Flusso di lavoro</div>\n  <h2 class=\"slide-title\">Pipeline in 4 passi a minimo consumo di token</h2>\n  <div id=\"s1\" class=\"grid-2 cue-hidden\">\n    <div id=\"g-1\" class=\"box box-def\">\n      <div class=\"box-label\">1 · Ingestione &amp; Authoring</div>\n      <p><code>ingest.py</code> legge PDF, PPTX, LaTeX o Markdown; l'IA scrive solo i contenuti didattici in <code>lesson.json</code>.</p>\n    </div>\n    <div id=\"g-2\" class=\"box box-primary\">\n      <div class=\"box-label\">2 · Audio &amp; Sync automatico</div>\n      <p>TTS batch + allineamento word-level + <code>polish_sync.mjs</code> + gate <code>verify_sync.mjs</code> a 7 invarianti.</p>\n    </div>\n  </div>\n  <div id=\"s2\" class=\"box box-idea cue-hidden\">\n    <div class=\"box-label\">3 · Deploy istantaneo</div>\n    <p>Ogni <code>git push</code> su <code>main</code> pubblica il corso su GitHub Pages con URL puliti, ricerca <strong>Ctrl+K</strong> e cover OG automatiche.</p>\n  </div>\n</div>\n",
+      "cues": [
+        { "at": 2.4, "action": "show", "target": "#s1", "anchor": "La pipeline di Lectio" },
+        { "at": 6.2, "action": "highlight", "target": "#g-1", "duration": 6.0, "anchor": "ingest.py estrae i testi" },
+        { "at": 12.4, "action": "highlight", "target": "#g-2", "duration": 7.0, "anchor": "generano l'audio TTS" },
+        { "at": 19.6, "action": "show", "target": "#s2", "anchor": "pubblicano il sito statico" },
+        { "at": 19.7, "action": "highlight", "target": "#s2", "duration": 5.0, "anchor": "pubblicano il sito statico" }
+      ],
+      "audio_file": "audio/scene-02.wav",
+      "subtitle_file": "subtitles/scene-02.json",
+      "duration_sec": 25.0
+    }
+  ]
+}

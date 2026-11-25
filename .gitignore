@@ -1,0 +1,21 @@
+# Secrets & local env
+.env
+.env.local
+
+# Build outputs
+videolezioni/dist/
+_site/
+
+# Extracted source cache & TTS batch temp files
+sources/_extracted/
+videolezioni/lessons/**/.batches/
+videolezioni/lessons/**/.chunks/
+videolezioni/lessons/**/audio/.batches/
+videolezioni/lessons/**/audio/.chunks/
+
+# Dependencies & OS artifacts
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

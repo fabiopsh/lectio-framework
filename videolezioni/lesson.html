@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="studio">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#F6F6F3" />
+  <title>Videolezione — Lectio</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-lia.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+</head>
+<body class="player-body">
+  <header class="topbar">
+    <div class="topbar-left">
+      <a class="back-link" href="index.html" title="Torna al catalogo dei capitoli" aria-label="Torna ai capitoli">
+        <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        <span class="back-link-label">Capitoli</span>
+      </a>
+      <div class="lesson-heading">
+        <span id="lesson-chap-tag" class="lesson-chap-tag">Cap. --</span>
+        <span id="lesson-title-bar" class="lesson-title-bar">Caricamento...</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <div id="player-theme-switcher" class="player-theme-compact"></div>
+      <div class="topbar-icon-group" role="toolbar" aria-label="Strumenti lezione">
+        <button id="toggle-sidebar" class="tb-icon-btn active" type="button" title="Indice scene (S)" aria-label="Mostra o nascondi indice scene" data-tip="Indice (S)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><line x1="9" y1="4" x2="9" y2="20"/></svg>
+        </button>
+        <button id="toggle-subtitles" class="tb-icon-btn active" type="button" title="Sottotitoli sincronizzati (C)" aria-label="Attiva o disattiva sottotitoli" data-tip="Sottotitoli (C)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M9.8 10.2a2.2 2.2 0 1 0 0 3.6"/><path d="M16.2 10.2a2.2 2.2 0 1 0 0 3.6"/></svg>
+        </button>
+        <button id="toggle-avatar" class="tb-icon-btn tb-avatar-btn" type="button" hidden title="Avatar tutor Lia (V)" aria-label="Attiva o disattiva avatar tutor" data-tip="Avatar Lia (V)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6"/><path d="M5.5 19.2c1.2-3.2 3.7-4.7 6.5-4.7s5.3 1.5 6.5 4.7"/></svg>
+        </button>
+        <button id="toggle-reveal-all" class="tb-icon-btn" type="button" title="Mostra tutta la slide (A)" aria-label="Mostra tutta la slide" data-tip="Mostra tutto (A)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.8"/></svg>
+        </button>
+        <button id="toggle-auto-advance" class="tb-icon-btn active" type="button" title="Auto-avanza alla scena successiva" aria-label="Auto-avanza scena" data-tip="Auto-avanza">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 6 13 12 5 18 5 6"/><line x1="16.5" y1="6" x2="16.5" y2="18"/><polyline points="19.5 9 22 12 19.5 15"/></svg>
+        </button>
+        <button id="toggle-theater" class="tb-icon-btn tb-desktop-only" type="button" title="Modalità teatro (T)" aria-label="Modalità teatro" data-tip="Teatro (T)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M6.5 9.5h11v5h-11z" opacity="0.45"/></svg>
+        </button>
+        <button id="toggle-clean" class="tb-icon-btn tb-desktop-only" type="button" title="Modalità pulita (Esc per uscire)" aria-label="Modalità pulita" data-tip="Pulita">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+        </button>
+        <button id="btn-search" class="tb-icon-btn" type="button" title="Cerca nel corso (Ctrl+K)" aria-label="Cerca nel corso" data-tip="Cerca (Ctrl+K)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        </button>
+        <button id="btn-share" class="tb-icon-btn" type="button" title="Copia link diretto" aria-label="Condividi lezione" data-tip="Condividi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l2.5-2.5a5 5 0 0 0-7.07-7.07l-1.42 1.42"/><path d="M14 11a5 5 0 0 0-7.54-.54l-2.5 2.5a5 5 0 0 0 7.07 7.07l1.42-1.42"/></svg>
+        </button>
+        <button id="btn-report-error" class="tb-icon-btn" type="button" title="Segnala un errore in questa scena" aria-label="Segnala errore" data-tip="Segnala errore">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5"/><path d="M4 5h12l-2 4.5L16 14H4"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="clean-exit-bar" class="clean-exit-bar" aria-hidden="true">
+    <span class="clean-exit-hint">Modalità pulita</span>
+    <button id="btn-exit-clean" class="clean-exit-btn" type="button" title="Esci dalla modalità pulita (Esc)">
+      <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      <span>Esci</span>
+      <kbd>Esc</kbd>
+    </button>
+  </div>
+
+  <div class="player-workspace">
+    <aside id="scene-sidebar" class="scene-sidebar">
+      <div class="sidebar-head">
+        <span>Indice delle scene</span>
+        <span id="scene-counter" class="scene-counter">Scena 1 / --</span>
+      </div>
+      <div id="scene-list" class="scene-list"></div>
+    </aside>
+
+    <main class="stage-column">
+      <div class="stage-viewport">
+        <article id="slide-frame" class="slide-frame"></article>
+        <div id="chapter-next-banner" class="chapter-next-banner" aria-hidden="true">
+          <div class="chapter-next-info">
+            <span id="chapter-next-kicker" class="chapter-next-kicker">Capitolo completato</span>
+            <strong id="chapter-next-title" class="chapter-next-title">Capitolo successivo</strong>
+          </div>
+          <div class="chapter-next-actions">
+            <a id="chapter-next-link" class="chapter-next-btn" href="index.html">
+              <span id="chapter-next-cta">Vai al successivo</span>
+              <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+            </a>
+            <button id="chapter-next-dismiss" class="chapter-next-close" type="button" title="Chiudi" aria-label="Chiudi banner">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="subtitle-dock" class="subtitle-dock">
+        <div class="subtitle-row">
+          <div id="tutor-avatar" class="avatar-card avatar-hidden" role="img" aria-label="Tutor virtuale Lia" title="Lia · Tutor del corso (premi V per nascondere)">
+            <div id="tutor-avatar-sprite" class="avatar-sprite"></div>
+            <span class="avatar-live-dot" aria-hidden="true"></span>
+          </div>
+          <div id="subtitle-box" class="subtitle-box" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <footer id="control-bar" class="control-bar spotify-bar">
+        <div class="spotify-left">
+          <span id="scene-now-badge" class="spotify-scene-badge">01 / --</span>
+          <span id="scene-now-title" class="spotify-scene-title">Caricamento...</span>
+          <span id="audio-notice" class="audio-notice"></span>
+        </div>
+
+        <div class="spotify-center">
+          <div class="spotify-transport">
+            <button id="btn-replay" class="sp-btn sp-btn-ghost" type="button" title="Riparti dall'inizio della scena" aria-label="Ripeti scena">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+            </button>
+            <button id="btn-prev" class="sp-btn sp-btn-ghost" type="button" title="Scena precedente" aria-label="Scena precedente">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4" y="5" width="2.5" height="14" rx="1"/><path d="M19 6.2a1 1 0 0 0-1.56-.83l-8.8 5.8a1 1 0 0 0 0 1.66l8.8 5.8A1 1 0 0 0 19 17.8V6.2z"/></svg>
+            </button>
+            <button id="btn-play" class="sp-btn sp-btn-play" type="button" title="Riproduci / Pausa (Spazio)" aria-label="Riproduci">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l11.02-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z"/></svg>
+            </button>
+            <button id="btn-next" class="sp-btn sp-btn-ghost" type="button" title="Scena successiva" aria-label="Scena successiva">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="17.5" y="5" width="2.5" height="14" rx="1"/><path d="M5 6.2a1 1 0 0 1 1.56-.83l8.8 5.8a1 1 0 0 1 0 1.66l-8.8 5.8A1 1 0 0 1 5 17.8V6.2z"/></svg>
+            </button>
+          </div>
+
+          <div class="spotify-progress">
+            <span id="time-current" class="time-stamp">00:00</span>
+            <div id="scrubber-wrap" class="scrubber-wrap" aria-label="Avanzamento scena">
+              <div id="scrubber-track" class="scrubber-track">
+                <div id="scrubber-fill" class="scrubber-fill"></div>
+                <div id="scrubber-thumb" class="scrubber-thumb"></div>
+              </div>
+            </div>
+            <span id="time-total" class="time-stamp">00:00</span>
+          </div>
+        </div>
+
+        <div class="spotify-right">
+          <div class="speed-pill">
+            <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            <select id="speed-select" class="speed-select" aria-label="Velocità di riproduzione">
+              <option value="0.85">0.85×</option>
+              <option value="1" selected>1.0×</option>
+              <option value="1.15">1.15×</option>
+              <option value="1.3">1.3×</option>
+              <option value="1.5">1.5×</option>
+            </select>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script type="module" src="js/player.js"></script>
+</body>
+</html>

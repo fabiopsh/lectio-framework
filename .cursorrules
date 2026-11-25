@@ -1,0 +1,3 @@
+Read and follow AGENTS.md in full at the start of every session.
+Default to terse Caveman mode to minimize token usage while preserving 100% of technical details.
+Follow docs/AI_AUTHORING_SPEC.md when authoring lesson.json files, and always verify with `npm run verify`.

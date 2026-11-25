@@ -1,0 +1,16 @@
+{
+  "name": "lectio-framework",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Zero-token deterministic sync polisher & 7-invariant quality gate for Lectio interactive videolessons",
+  "scripts": {
+    "polish": "node videolezioni/scripts/polish_sync.mjs",
+    "verify": "node videolezioni/scripts/verify_sync.mjs",
+    "verify:verbose": "node videolezioni/scripts/verify_sync.mjs --verbose"
+  },
+  "dependencies": {
+    "katex": "^0.16.11",
+    "linkedom": "^0.18.9"
+  }
+}

@@ -30,9 +30,21 @@ Ask the user in ONE concise message for:
 1. **Titolo del corso** + eventuale codice / istituzione / anno (per l'eyebrow in home).
 2. **Autore appunti** + **username GitHub** e nome repo (opzionale — attiva link repo, badge stelle, pulsante *Segnala errore* e GitHub Pages).
 3. **Docente** (opzionale: nome e link).
-4. **Lingua** (`it` default / `en` / ...), **tema default** (`studio`, `carbon`, `glass`, `arcade`) e **avatar tutor Lia** (on/off).
+4. **Lingua** (`it` default / `en` / ...) e **tema default** (`studio`, `carbon`, `glass`, `arcade`).
+5. **Assistente tutor & voce**:
+   - **Default pronto (0 sforzo)**: **Lia** (avatar pixel-art già incluso) + voce femminile `Kore`.
+   - **Personalizzato (opzionale)**: scegli **nome** (es. *Marco*, *Ada*, *Prof. Nova*), **voce diversa** (Gemini: `Kore`, `Aoede`, `Leda`, `Zephyr` femminili / `Orus`, `Charon`, `Fenrir`, `Puck` maschili — oppure Edge gratuita `it-IT-ElsaNeural` / `it-IT-DiegoNeural`; vedi `python videolezioni/scripts/generate_avatar.py --list-voices`) e, se vuoi, **genera un nuovo avatar** descrivendone l'aspetto!
+   - **Senza avatar**: disattiva l'avatar (`tutor_avatar.enabled = false`).
 
 Update `course.config.json` immediately after they answer (NEVER hardcode metadata inside HTML/JS!).
+
+If the user asks for a **custom avatar**:
+- **Option A (harness has native image-generation tool, e.g. Antigravity `image-generator`)**: generate 1 base bust portrait (`0_idle.png`, solid white background, crisp illustrated/pixel-art style) + 5 expression edits from it (`1_blink.png`, `2_speak_mid.png`, `3_speak_open.png`, `4_speak_round.png`, `5_happy.png`) into a temp folder, then run:
+  `python videolezioni/scripts/generate_avatar.py --name "<Nome>" --from-dir <folder> --voice <Voce>`
+- **Option B (no native image tool, using user's `GEMINI_API_KEY`)**: after Step 3 sets `GEMINI_API_KEY`, run:
+  `python videolezioni/scripts/generate_avatar.py --name "<Nome>" --prompt "<descrizione>" --voice <Voce>`
+- Both automatically build the 6-frame horizontal spritesheet in `videolezioni/assets/<slug>-spritesheet.png` and update `course.config.json` (`tutor_avatar.name`, `tutor_avatar.spritesheet`, `tts.voice_name`)!
+- If the user only changes **name** and/or **voice** (keeping Lia's spritesheet): just update `course.config.json` (or run `python videolezioni/scripts/generate_avatar.py --name "<Nome>" --voice <Voce>`).
 
 ### Step 3 — Simple TTS API Key Onboarding
 Run `python videolezioni/scripts/setup_tts.py --check`.

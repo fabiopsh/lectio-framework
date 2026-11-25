@@ -26,12 +26,13 @@ L'IA legge automaticamente [`AGENTS.md`](AGENTS.md) (più `CLAUDE.md`, `GEMINI.m
 ## Cosa include già pronto all'uso
 
 - **Player dinamico + Live-Sync voce ↔ formule KaTeX**: renderizza HTML, grafici SVG e matematica KaTeX nel browser illuminando in tempo reale box, singoli passi `<li>`, righe tabella e simboli esatti nelle formule, con sottotitoli parola per parola.
-- **Lia, tutor pixel-art sincronizzata**: avatar animato collegato ai timestamp della voce (disattivabile in `course.config.json` o con `V`).
+- **Tutor virtuale personalizzabile (default: Lia + voce `Kore`)**: avatar animato sincronizzato al labiale dai timestamp della voce — puoi tenere **Lia** così com'è, disattivarlo, oppure **creare il tuo tutor su misura** (scegliendo nome, voce Gemini/Edge diversa e generando un nuovo avatar con `generate_avatar.py`).
 - **Ricerca globale `Ctrl+K`** su tutte le scene del corso (slide, formule e trascrizioni).
 - **4 temi live**: `Studio` (chiaro editoriale), `Carbon` (scuro grafite), `Liquid Glass` e `16-bit`.
 - **Progresso locale + continuità**: ore completate, Mappa del Corso + Griglia Bento, banner **Capitolo successivo** a fine lezione, pulsante **Segnala errore** (GitHub Issue pre-compilata).
 - **Script deterministici a 0 token LLM**:
   - `ingest.py` — estrae testo e pagine da PDF/PPTX/LaTeX/Markdown;
+  - `generate_avatar.py` — elenca voci TTS e genera/assembla un avatar tutor custom (6 frame + `course.config.json`);
   - `setup_tts.py` + `generate_batch.py` — TTS Gemini Batch (50% sconto, ~0,85 €/ora con budget cap) o Edge TTS gratuito;
   - `align_audio.py` — allineamento word-level (MMS_FA);
   - `npm run polish` — accorcia intro lunghe (`<= 4,5 s`) e aggiunge highlight granulari;

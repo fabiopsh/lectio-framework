@@ -180,9 +180,12 @@ def blend_hex(fg: str, bg: str, ratio: float) -> tuple[int, int, int, int]:
     )
 
 
-def load_lia_frame(frame_idx: int = 5, size: int = 240) -> Any | None:
-    """Load a crisp pixel-art frame of Lia from assets/lia-spritesheet.png."""
-    sheet_path = VIDEOLEZIONI_DIR / "assets" / "lia-spritesheet.png"
+def load_lia_frame(frame_idx: int = 5, size: int = 240, spritesheet_rel: str = "assets/lia-spritesheet.png") -> Any | None:
+    """Load a crisp frame of the configured tutor avatar from videolezioni/<spritesheet_rel>."""
+    rel = str(spritesheet_rel or "assets/lia-spritesheet.png").lstrip("/\\")
+    sheet_path = VIDEOLEZIONI_DIR / rel
+    if not sheet_path.is_file():
+        sheet_path = VIDEOLEZIONI_DIR / "assets" / "lia-spritesheet.png"
     if not sheet_path.is_file():
         return None
     sheet = Image.open(sheet_path).convert("RGBA")
@@ -608,6 +611,7 @@ def generate_og_card(
     tutor_cfg = cfg.get("tutor_avatar") or {}
     tutor_enabled = tutor_cfg.get("enabled", True) is not False
     tutor_name = str(tutor_cfg.get("name") or "Lia").strip() or "Lia"
+    tutor_sheet = str(tutor_cfg.get("spritesheet") or "assets/lia-spritesheet.png").strip()
     author_cfg = cfg.get("author") or {}
     prof_cfg = cfg.get("professor") or {}
     course_title = str(cfg.get("title") or title or "Videolezioni").strip()
@@ -679,7 +683,7 @@ def generate_og_card(
             outline=hex_to_rgba("#E5E5E0", 255),
             width=2,
         )
-        lia_big = load_lia_frame(frame_idx=5, size=310)
+        lia_big = load_lia_frame(frame_idx=5, size=310, spritesheet_rel=tutor_sheet)
         if lia_big is not None:
             lx = panel_x + (panel_w - 310) // 2
             ly = panel_y + panel_h - 306
@@ -808,7 +812,7 @@ def generate_og_card(
             credit_parts.append(str(prof_cfg["name"]).strip())
         credit_line = " · ".join(credit_parts) if credit_parts else course_title
 
-        lia_mini = load_lia_frame(frame_idx=5, size=56) if tutor_enabled else None
+        lia_mini = load_lia_frame(frame_idx=5, size=56, spritesheet_rel=tutor_sheet) if tutor_enabled else None
         if lia_mini is not None:
             badge_box = [left, foot_y, left + 56, foot_y + 56]
             draw.rounded_rectangle(badge_box, radius=14, fill=hex_to_rgba("#F6F6F3", 255), outline=hex_to_rgba("#E5E5E0", 255), width=2)

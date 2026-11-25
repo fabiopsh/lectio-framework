@@ -7,12 +7,12 @@ export const DEFAULT_CONFIG = {
   eyebrow: ["Corso Universitario", "Videolezioni Interattive"],
   language: "it",
   default_theme: "studio",
-  tutor_avatar: { enabled: true, name: "Lia" },
+  tutor_avatar: { enabled: true, name: "Lia", spritesheet: "assets/lia-spritesheet.png", description: "" },
   author: { name: "", label_prefix: "Appunti di", github_username: "", avatar: "" },
   professor: { name: "", role: "Docente del corso", url: "", avatar: "" },
   github: { repo: "", pages_url: "", show_star_button: true, enable_issue_reporter: true },
   search: { suggested_queries: ["teorema", "algoritmo", "esempio", "formula"] },
-  tts: { provider: "gemini", model: "gemini-2.5-flash-preview-tts", voice_name: "Kore" },
+  tts: { provider: "gemini", model: "gemini-3.8-flash-tts", voice_name: "Kore", edge_voice: "it-IT-ElsaNeural" },
   math_macros: {}
 };
 

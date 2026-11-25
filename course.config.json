@@ -7,7 +7,9 @@
   "default_theme": "studio",
   "tutor_avatar": {
     "enabled": true,
-    "name": "Lia"
+    "name": "Lia",
+    "spritesheet": "assets/lia-spritesheet.png",
+    "description": ""
   },
   "author": {
     "name": "Il Tuo Nome",
@@ -38,8 +40,9 @@
   },
   "tts": {
     "provider": "gemini",
-    "model": "gemini-2.5-flash-preview-tts",
+    "model": "gemini-3.8-flash-tts",
     "voice_name": "Kore",
+    "edge_voice": "it-IT-ElsaNeural",
     "style": "chiaro, didattico, calmo e preciso, stile lezione universitaria divulgativa",
     "budget_eur": 5.0
   },

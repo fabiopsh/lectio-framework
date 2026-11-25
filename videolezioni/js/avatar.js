@@ -97,9 +97,10 @@ function findActiveWord(subtitles, t) {
 }
 
 export class TutorAvatar {
-  constructor(cardEl, spriteEl, assetRoot) {
+  constructor(cardEl, spriteEl, assetRoot, spriteRelPath = "assets/lia-spritesheet.png") {
     this.cardEl = cardEl;
     this.spriteEl = spriteEl;
+    this.assetRoot = (assetRoot || ".").replace(/\/+$/, "");
     this.enabled = false;
     this.available = false;
     this.currentFrame = FRAME_IDLE;
@@ -119,9 +120,13 @@ export class TutorAvatar {
     this.visemeCache = new Map();
     this.idleTimerId = null;
 
-    if (this.spriteEl) {
-      this.spriteEl.style.backgroundImage = `url("${assetRoot}/assets/lia-spritesheet.png")`;
-    }
+    this.setSpritePath(spriteRelPath);
+  }
+
+  setSpritePath(spriteRelPath) {
+    if (!this.spriteEl) return;
+    const rel = String(spriteRelPath || "assets/lia-spritesheet.png").replace(/^\/+/, "");
+    this.spriteEl.style.backgroundImage = `url("${this.assetRoot}/${rel}")`;
   }
 
   init(available, initiallyOn) {

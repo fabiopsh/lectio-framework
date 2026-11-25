@@ -663,19 +663,41 @@ async def process_lesson(
         print(f"Spesa questa run: {run_spent_eur[0]:.3f}€ | Totale cumulativo: {budget_state['total_eur']:.3f}€ / {global_cap_eur:.2f}€")
 
 
+def load_course_tts_config() -> dict[str, Any]:
+    """Legge i default TTS (voice_name, edge_voice, model, budget_eur) da course.config.json."""
+    cfg_path = ROOT.parent / "course.config.json"
+    if cfg_path.is_file():
+        try:
+            data = json.loads(cfg_path.read_text(encoding="utf-8"))
+            if isinstance(data.get("tts"), dict):
+                return data["tts"]
+        except Exception:
+            pass
+    return {}
+
+
 def main() -> None:
     load_dotenv_files()
+    tts_cfg = load_course_tts_config()
+    default_provider = str(tts_cfg.get("provider") or "gemini").strip()
+    if default_provider not in ("edge", "gtts", "gemini"):
+        default_provider = "gemini"
+    default_model = str(tts_cfg.get("model") or "gemini-3.8-flash-tts").strip()
+    default_gemini_voice = str(tts_cfg.get("voice_name") or "Kore").strip()
+    default_edge_voice = str(tts_cfg.get("edge_voice") or "it-IT-ElsaNeural").strip()
+    default_budget = float(tts_cfg.get("budget_eur") or 4.80)
+
     parser = argparse.ArgumentParser(description="Genera audio locale e sottotitoli sincronizzati con guardia budget.")
-    parser.add_argument("lesson", help="Slug della lezione (es. 10-perceptron)")
-    parser.add_argument("--provider", choices=["edge", "gtts", "gemini"], default="gemini",
-                        help="Servizio TTS (default: gemini)")
+    parser.add_argument("lesson", help="Slug della lezione (es. 01-introduzione)")
+    parser.add_argument("--provider", choices=["edge", "gtts", "gemini"], default=default_provider,
+                        help=f"Servizio TTS (default da course.config.json: {default_provider})")
     parser.add_argument("--voice", default=None,
-                        help="Nome voce (gemini: Kore/Orus/Charon/Aoede; edge: it-IT-ElsaNeural/it-IT-DiegoNeural)")
+                        help=f"Nome voce (default da course.config.json: gemini={default_gemini_voice}, edge={default_edge_voice})")
     parser.add_argument("--rate", default="+0%", help="Velocità parlato edge-tts")
-    parser.add_argument("--gemini-model", default="gemini-3.8-flash-tts", help="Modello Gemini TTS")
+    parser.add_argument("--gemini-model", default=default_model, help=f"Modello Gemini TTS (default: {default_model})")
     parser.add_argument("--max-chunk-words", type=int, default=52, help="Parole massime per chunk Gemini (anti-allucinazione)")
     parser.add_argument("--max-run-eur", type=float, default=0.50, help="Tetto massimo di spesa per singola run in EUR")
-    parser.add_argument("--global-cap-eur", type=float, default=4.80, help="Tetto massimo cumulativo globale in EUR (sotto limite 5€)")
+    parser.add_argument("--global-cap-eur", type=float, default=default_budget, help=f"Tetto massimo cumulativo globale in EUR (default: {default_budget})")
     parser.add_argument("--scene", default=None, help="Genera una sola scena specifica (es. scene-03)")
     parser.add_argument("--dry-run", action="store_true", help="Stima chunk e costo senza chiamare API")
     parser.add_argument("--force", action="store_true", help="Ignora cache chunk e rigenera tutto")
@@ -684,9 +706,9 @@ def main() -> None:
     voice = args.voice
     if not voice:
         if args.provider == "gemini":
-            voice = "Kore"
+            voice = default_gemini_voice
         elif args.provider == "edge":
-            voice = "it-IT-ElsaNeural"
+            voice = default_edge_voice
         else:
             voice = "google-it"
 

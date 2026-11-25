@@ -899,7 +899,20 @@ function setupControls() {
     });
   }
 
-  const avatarAvailable = isAvatarAvailable(LESSON_ID) && state.courseConfig?.tutor_avatar?.enabled !== false;
+  const tutorCfg = state.courseConfig?.tutor_avatar || {};
+  const tutorName = (tutorCfg.name || "Lia").trim() || "Lia";
+  const tutorSprite = (tutorCfg.spritesheet || "assets/lia-spritesheet.png").trim();
+  tutorAvatar.setSpritePath(tutorSprite);
+  if (dom.avatarCard) {
+    dom.avatarCard.setAttribute("aria-label", `Tutor virtuale ${tutorName}`);
+    dom.avatarCard.title = `${tutorName} · Tutor del corso (premi V per nascondere)`;
+  }
+  if (dom.toggleAvatar) {
+    dom.toggleAvatar.title = `Avatar tutor ${tutorName} (V)`;
+    dom.toggleAvatar.dataset.tip = `Avatar ${tutorName} (V)`;
+  }
+
+  const avatarAvailable = isAvatarAvailable(LESSON_ID) && tutorCfg.enabled !== false;
   if (avatarAvailable) {
     if (dom.toggleAvatar) dom.toggleAvatar.hidden = false;
     tutorAvatar.init(true, getSavedAvatarOn());

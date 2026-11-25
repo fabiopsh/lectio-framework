@@ -53,6 +53,7 @@ from generate_audio import (
     compute_cost_eur,
     extract_pcm_from_api_bytes,
     load_budget_state,
+    load_course_tts_config,
     load_dotenv_files,
     save_budget_state,
 )
@@ -493,15 +494,20 @@ def run_batch_pipeline(
 
 def main() -> None:
     load_dotenv_files()
+    tts_cfg = load_course_tts_config()
+    default_model = str(tts_cfg.get("model") or "gemini-3.8-flash-tts").strip()
+    default_voice = str(tts_cfg.get("voice_name") or "Kore").strip()
+    default_budget = float(tts_cfg.get("budget_eur") or 4.80)
+
     parser = argparse.ArgumentParser(description="Batch-and-Splice Gemini TTS + MMS_FA (risparmia 15x RPD).")
-    parser.add_argument("lesson", help="Slug della lezione (es. 10-perceptron)")
+    parser.add_argument("lesson", help="Slug della lezione (es. 01-introduzione)")
     parser.add_argument("--scenes", default=None, help="Lista separata da virgola (es. scene-01,scene-02)")
     parser.add_argument("--all-missing", action="store_true", help="Genera tutte le scene senza file .wav")
     parser.add_argument("--max-batch-words", type=int, default=390, help="Parole massime per singola chiamata API (default 390 = ~2-3 scene)")
-    parser.add_argument("--model", default="gemini-3.8-flash-tts")
-    parser.add_argument("--voice", default="Kore")
+    parser.add_argument("--model", default=default_model, help=f"Modello Gemini TTS (default da course.config.json: {default_model})")
+    parser.add_argument("--voice", default=default_voice, help=f"Nome voce Gemini TTS (default da course.config.json: {default_voice})")
     parser.add_argument("--max-run-eur", type=float, default=0.50)
-    parser.add_argument("--global-cap-eur", type=float, default=4.80)
+    parser.add_argument("--global-cap-eur", type=float, default=default_budget)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()

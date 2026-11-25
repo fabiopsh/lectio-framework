@@ -176,8 +176,13 @@ async function initCatalog() {
 
   const resumeCardEl = document.getElementById("resume-card");
   const heroLiaStage = document.getElementById("hero-lia-stage");
+  const heroLiaSprite = document.getElementById("hero-lia-sprite");
   if (cfg.tutor_avatar?.enabled !== false) {
-    mountHeroLia(resumeCardEl, document.getElementById("hero-lia-sprite"));
+    if (heroLiaSprite) {
+      const spriteRel = String(cfg.tutor_avatar?.spritesheet || "assets/lia-spritesheet.png").replace(/^\/+/, "");
+      heroLiaSprite.style.backgroundImage = `url("${spriteRel}")`;
+    }
+    mountHeroLia(resumeCardEl, heroLiaSprite);
   } else if (heroLiaStage && resumeCardEl) {
     heroLiaStage.remove();
     resumeCardEl.classList.remove("resume-card-with-lia");

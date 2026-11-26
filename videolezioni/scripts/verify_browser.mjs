@@ -528,7 +528,10 @@ try {
 } finally {
   chrome.kill("SIGKILL");
   server.close();
-  fs.rmSync(userDataDir, { recursive: true, force: true });
+  await sleep(150);
+  try {
+    fs.rmSync(userDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  } catch {}
 }
 
 const hardFails =

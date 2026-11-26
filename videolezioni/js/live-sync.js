@@ -1504,8 +1504,8 @@ export class LiveSyncEngine {
     this.stage.querySelectorAll(".math-live-glow").forEach((el) => {
       el.classList.remove("math-live-glow");
     });
-    this.stage.querySelectorAll(".spotlight-active, .spotlight-dim").forEach((el) => {
-      el.classList.remove("spotlight-active", "spotlight-dim");
+    this.stage.querySelectorAll(".spotlight-active, .spotlight-group, .spotlight-dim").forEach((el) => {
+      el.classList.remove("spotlight-active", "spotlight-group", "spotlight-dim");
     });
     this.activeAtom = null;
   }
@@ -1582,7 +1582,7 @@ export class LiveSyncEngine {
     const totalDur = (subtitles && subtitles.duration) || 60;
 
     // 3. Build Spotlight blocks (outermost content cards) + Math-owner blocks (includes title & highlighted table rows & li items)
-    const blockSelectors = ".box, .math-card, .proof-step, .svg-panel, .acad-table, .pill-strip, .props-grid, .metrics-row, .gate-card, .plot-card";
+    const blockSelectors = ".box, .math-card, .proof-step, .svg-panel, .acad-table, .pill-strip, .props-grid, .metrics-row, .flow-chain, .gate-card, .plot-card";
     const rawBlocks = Array.from(slideCard.querySelectorAll(blockSelectors)).filter(
       (el) => !el.parentElement?.closest(".box, .math-card, .proof-step, .svg-panel")
     );
@@ -2077,12 +2077,19 @@ export class LiveSyncEngine {
     }
 
     // 2. Word-by-word sequential clause highlighting (NEVER underline inside a dimmed/non-highlighted box!)
-    const spotlightSel = ".box, .math-card, .proof-step, .svg-panel, .acad-table, .pill-strip, .props-grid, .metrics-row, .gate-card, .plot-card";
+    const spotlightSel = ".box, .math-card, .proof-step, .svg-panel, .acad-table, .pill-strip, .props-grid, .metrics-row, .flow-chain, .gate-card, .plot-card";
+    const findOwnerBlock = (el) => {
+      if (!el) return null;
+      for (const b of this.blocks) {
+        if (b.el === el || b.el.contains(el)) return b.el;
+      }
+      return el.closest(spotlightSel);
+    };
     const explicitHl = this.stage.querySelector(".cue-highlight");
-    const hlBlock = explicitHl ? explicitHl.closest(spotlightSel) : null;
+    const hlBlock = findOwnerBlock(explicitHl);
     const hlIsFine = Boolean(
       explicitHl &&
-      (explicitHl.tagName === "LI" || explicitHl.tagName === "TR" || explicitHl.tagName === "TD" || explicitHl.classList.contains("metric-pill"))
+      (explicitHl.tagName === "LI" || explicitHl.tagName === "TR" || explicitHl.tagName === "TD" || explicitHl.tagName === "P" || explicitHl.classList.contains("metric-pill") || explicitHl.classList.contains("metric") || explicitHl.classList.contains("pill") || explicitHl.classList.contains("prop-item"))
     );
 
     let bestClause = null;
@@ -2126,7 +2133,7 @@ export class LiveSyncEngine {
       if (atom.windows.length === 0) continue;
       if (atom.els[0].closest(".cue-hidden")) continue;
       if (hlBlock) {
-        const atomBlock = atom.els[0].closest(spotlightSel);
+        const atomBlock = findOwnerBlock(atom.els[0]);
         if (atomBlock && atomBlock !== hlBlock) continue;
       }
       for (const w of atom.windows) {
@@ -2147,13 +2154,13 @@ export class LiveSyncEngine {
       this.activeAtom = winnerAtom;
     }
 
-    // 4. Determine SINGLE active Spotlight block (explicit cue -> active clause -> active formula -> latest revealed block/nested cue)
+    // 4. Determine active Spotlight block(s) (explicit cue -> active clause -> active formula -> latest revealed block/group)
     let activeBlock = hlBlock;
     if (!activeBlock && bestClause) {
-      activeBlock = bestClause.block;
+      activeBlock = findOwnerBlock(bestClause.block);
     }
     if (!activeBlock && winnerAtom && winnerAtom.els[0]) {
-      activeBlock = winnerAtom.els[0].closest(spotlightSel);
+      activeBlock = findOwnerBlock(winnerAtom.els[0]);
     }
     if (!activeBlock && Array.isArray(this.nestedShowEvents)) {
       let latestTextShow = -1;
@@ -2162,7 +2169,7 @@ export class LiveSyncEngine {
       let latestSvgBlock = null;
       for (const ev of this.nestedShowEvents) {
         if (ev.el.classList.contains("cue-hidden") || ev.el.closest(".cue-hidden")) continue;
-        const owner = ev.el.closest(spotlightSel);
+        const owner = findOwnerBlock(ev.el);
         if (!owner) continue;
         if (owner.classList.contains("svg-panel")) {
           if (t >= ev.showAt && ev.showAt >= latestSvgShow) {
@@ -2182,32 +2189,57 @@ export class LiveSyncEngine {
         activeBlock = latestTextBlock;
       }
     }
+
+    const visibleBlocks = this.blocks.filter((b) => !b.el.classList.contains("cue-hidden"));
+    let activeGroup = null;
     if (!activeBlock) {
       let latestShow = -1;
-      for (const b of this.blocks) {
-        if (!b.el.classList.contains("cue-hidden") && t >= b.showAt && b.showAt >= latestShow) {
+      for (const b of visibleBlocks) {
+        if (t >= b.showAt && b.showAt > latestShow) {
           latestShow = b.showAt;
-          activeBlock = b.el;
+        }
+      }
+      if (latestShow >= 0) {
+        const latestBlocks = visibleBlocks.filter((b) => Math.abs(b.showAt - latestShow) < 0.12);
+        if (latestBlocks.length === 1) {
+          activeBlock = latestBlocks[0].el;
+        } else if (latestBlocks.length > 1) {
+          // Multiple sibling cards revealed together (e.g. .grid-2 / .grid-3) with no active cue/clause yet:
+          // keep all simultaneous siblings equally bright instead of arbitrarily dimming the left card!
+          activeGroup = new Set(latestBlocks.map((b) => b.el));
         }
       }
     }
 
-    // 5. Apply Spotlight to active block (highlight even when 1 block is visible; dim others only when >= 2)
-    const visibleBlocks = this.blocks.filter((b) => !b.el.classList.contains("cue-hidden"));
+    // 5. Apply Spotlight to active block (or keep simultaneous sibling group crisp while dimming older blocks)
     const shouldHighlight = visibleBlocks.length >= 1 && Boolean(activeBlock) && t > 0.25;
     const shouldDim = visibleBlocks.length >= 2 && Boolean(activeBlock) && t > 0.25;
+    const hasGroup = Boolean(activeGroup) && t > 0.25;
 
     for (const b of this.blocks) {
-      if (!shouldHighlight) {
-        b.el.classList.remove("spotlight-active", "spotlight-dim");
+      if (hasGroup) {
+        b.el.classList.remove("spotlight-active");
+        if (activeGroup.has(b.el) && !b.el.classList.contains("cue-hidden")) {
+          b.el.classList.add("spotlight-group");
+          b.el.classList.remove("spotlight-dim");
+        } else {
+          b.el.classList.remove("spotlight-group");
+          if (b.el.classList.contains("cue-hidden")) {
+            b.el.classList.remove("spotlight-dim");
+          } else {
+            b.el.classList.add("spotlight-dim");
+          }
+        }
+      } else if (!shouldHighlight) {
+        b.el.classList.remove("spotlight-active", "spotlight-group", "spotlight-dim");
       } else if (b.el === activeBlock) {
         b.el.classList.add("spotlight-active");
-        b.el.classList.remove("spotlight-dim");
+        b.el.classList.remove("spotlight-group", "spotlight-dim");
       } else if (shouldDim && !b.el.classList.contains("cue-hidden")) {
-        b.el.classList.remove("spotlight-active");
+        b.el.classList.remove("spotlight-active", "spotlight-group");
         b.el.classList.add("spotlight-dim");
       } else {
-        b.el.classList.remove("spotlight-active", "spotlight-dim");
+        b.el.classList.remove("spotlight-active", "spotlight-group", "spotlight-dim");
       }
     }
   }

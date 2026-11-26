@@ -358,13 +358,19 @@ try {
         const horizOv = card.scrollWidth > card.clientWidth + 3;
         const vertOv = cardRect.height > availH + 6;
 
-        // Detect overlapping SVG <text> labels
+        // Detect overlapping or out-of-bounds SVG <text> labels
         const svgOverlaps = [];
         for (const svg of card.querySelectorAll('svg.diagram-svg')) {
+          const sr = svg.getBoundingClientRect();
           const texts = Array.from(svg.querySelectorAll('text'))
             .filter((t) => (t.textContent || '').trim().length > 0 && getComputedStyle(t).display !== 'none' && getComputedStyle(t).visibility !== 'hidden')
             .map((t) => ({ txt: (t.textContent || '').trim().slice(0, 24), r: t.getBoundingClientRect() }))
             .filter((x) => x.r.width > 2 && x.r.height > 2);
+          for (const t of texts) {
+            if (sr.width > 10 && (t.r.left < sr.left - 3 || t.r.right > sr.right + 3 || t.r.top < sr.top - 3 || t.r.bottom > sr.bottom + 3)) {
+              svgOverlaps.push('OOB:' + t.txt);
+            }
+          }
           for (let a = 0; a < texts.length; a++) {
             for (let b = a + 1; b < texts.length; b++) {
               const r1 = texts[a].r, r2 = texts[b].r;

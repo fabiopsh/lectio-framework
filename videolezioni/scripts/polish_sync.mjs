@@ -370,7 +370,18 @@ for (const lesson of lessons) {
         }
       }
 
-      if (bEl.id && bStart >= 5.0 && !bEl.classList.contains("svg-panel")) {
+      if (
+        bEl.id &&
+        bStart >= 5.0 &&
+        !bEl.classList.contains("svg-panel") &&
+        !bEl.classList.contains("pill-strip") &&
+        !bEl.classList.contains("metrics-row") &&
+        !bEl.classList.contains("props-grid") &&
+        !bEl.classList.contains("flow-chain") &&
+        !bEl.classList.contains("grid-2") &&
+        !bEl.classList.contains("grid-3") &&
+        !bEl.classList.contains("split-visual")
+      ) {
         newCues.push({ at: r2(bStart + 0.1), action: "highlight", target: `#${bEl.id}`, duration: r2(Math.max(1.5, bEnd - bStart - 0.3)) });
         stats.blockHlAdded++;
       }

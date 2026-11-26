@@ -88,7 +88,8 @@ const lessons = filterLesson
   ? manifest.lessons.filter((l) => l.id === filterLesson)
   : manifest.lessons.filter((l) => l.status === "ready");
 
-const totals = { scenes: 0, introLate: 0, deadGaps: 0, falseMath: 0, bogusClauses: 0, crossBlockClauses: 0, goodClauses: 0, goodMathAtoms: 0, overlaps: 0, katexErrs: 0, cueErrs: 0, dupIds: 0, cueOverlaps: 0, metaWarns: 0 };
+const totals = { scenes: 0, introLate: 0, deadGaps: 0, falseMath: 0, bogusClauses: 0, crossBlockClauses: 0, goodClauses: 0, goodMathAtoms: 0, overlaps: 0, katexErrs: 0, cueErrs: 0, dupIds: 0, cueOverlaps: 0, wrapperHl: 0, hlHidden: 0, metaWarns: 0 };
+const WRAPPER_SEL = ".grid-2, .grid-3, .split-visual, .metrics-row, .pill-strip, .props-grid, .proof-steps, .flow-chain, .formula-col, .visual-col";
 
 for (const lesson of lessons) {
   const lDir = path.join(ROOT, "lessons", lesson.id);
@@ -124,10 +125,42 @@ for (const lesson of lessons) {
       }
     }
 
+    const showAtByEl = new Map();
     for (const c of scene.cues || []) {
-      if (stage.querySelectorAll(c.target).length === 0) {
+      const matched = stage.querySelectorAll(c.target);
+      if (matched.length === 0) {
         totals.cueErrs++;
         if (verbose) console.log(`  [CUE_MISSING] ${lesson.id}/${scene.id} @ ${c.at}s: ${c.action} "${c.target}"`);
+      } else if (c.action === "show") {
+        matched.forEach((el) => {
+          const prev = showAtByEl.get(el);
+          if (prev === undefined || c.at < prev) showAtByEl.set(el, c.at);
+        });
+      } else if (c.action === "highlight") {
+        matched.forEach((el) => {
+          if (el.matches(WRAPPER_SEL)) {
+            totals.wrapperHl++;
+            if (verbose) console.log(`  [WRAPPER_HL] ${lesson.id}/${scene.id} @ ${c.at}s: highlight on layout wrapper "${c.target}" (${el.className})`);
+          }
+        });
+      }
+    }
+    for (const c of scene.cues || []) {
+      if (c.action !== "highlight") continue;
+      for (const el of stage.querySelectorAll(c.target)) {
+        let cur = el;
+        let reqShow = 0;
+        while (cur && cur !== stage) {
+          if (cur.classList?.contains("cue-hidden")) {
+            const sAt = showAtByEl.get(cur);
+            if (typeof sAt === "number") reqShow = Math.max(reqShow, sAt);
+          }
+          cur = cur.parentElement;
+        }
+        if (reqShow > 0 && c.at < reqShow - 0.15) {
+          totals.hlHidden++;
+          if (verbose) console.log(`  [HL_HIDDEN] ${lesson.id}/${scene.id} @ ${c.at}s: "${c.target}" shown later at ${reqShow}s`);
+        }
       }
     }
 
@@ -234,7 +267,7 @@ for (const lesson of lessons) {
         lt.crossBlockClauses++;
         if (verbose) console.log(`  [CROSS_BLOCK_CLAUSE] ${lesson.id}/${scene.id} @ ${t}s`);
       }
-      const alive = Boolean(stage.querySelector(".spotlight-active, .cue-highlight, .voice-active, .math-live-glow"));
+      const alive = Boolean(stage.querySelector(".spotlight-active, .spotlight-group, .cue-highlight, .voice-active, .math-live-glow"));
       deadRun = alive ? 0 : deadRun + 1;
       if (deadRun > maxDeadRun) maxDeadRun = deadRun;
     }
@@ -251,8 +284,8 @@ for (const lesson of lessons) {
 }
 
 console.log(
-  `\nTOTAL (${totals.scenes} sc): introLate=${totals.introLate} | deadGaps=${totals.deadGaps} | falseMath=${totals.falseMath} | bogusClauses=${totals.bogusClauses} | xBlock=${totals.crossBlockClauses} | goodClauses=${totals.goodClauses} | goodMath=${totals.goodMathAtoms} | ov=${totals.overlaps} | kErr=${totals.katexErrs} | cErr=${totals.cueErrs} | dupId=${totals.dupIds} | cOv=${totals.cueOverlaps}${totals.metaWarns ? ` | metaWarn=${totals.metaWarns}` : ""}`
+  `\nTOTAL (${totals.scenes} sc): introLate=${totals.introLate} | deadGaps=${totals.deadGaps} | falseMath=${totals.falseMath} | bogusClauses=${totals.bogusClauses} | xBlock=${totals.crossBlockClauses} | goodClauses=${totals.goodClauses} | goodMath=${totals.goodMathAtoms} | ov=${totals.overlaps} | kErr=${totals.katexErrs} | cErr=${totals.cueErrs} | dupId=${totals.dupIds} | cOv=${totals.cueOverlaps} | wHl=${totals.wrapperHl} | hlHid=${totals.hlHidden}${totals.metaWarns ? ` | metaWarn=${totals.metaWarns}` : ""}`
 );
 
-const hardFails = totals.introLate + totals.deadGaps + totals.falseMath + totals.crossBlockClauses + totals.overlaps + totals.katexErrs + totals.cueErrs + totals.dupIds + totals.cueOverlaps;
+const hardFails = totals.introLate + totals.deadGaps + totals.falseMath + totals.crossBlockClauses + totals.overlaps + totals.katexErrs + totals.cueErrs + totals.dupIds + totals.cueOverlaps + totals.wrapperHl + totals.hlHidden;
 if (hardFails > 0) process.exit(1);

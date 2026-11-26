@@ -134,6 +134,10 @@ const state = {
   subtitlesOn: true,
   subtitles: null,
   subtitleCache: new Map(),
+  lastSubSegIdx: -1,
+  lastSubWordSpans: null,
+  autoAdvanceTimer: null,
+  sceneLoadToken: 0,
   completedScenes: new Set(),
   firstCueAt: 0,
   slideZoom: 1,
@@ -233,7 +237,15 @@ function applyAudioSeek(target) {
   return false;
 }
 
+function clearAutoAdvanceTimer() {
+  if (state.autoAdvanceTimer) {
+    clearTimeout(state.autoAdvanceTimer);
+    state.autoAdvanceTimer = null;
+  }
+}
+
 function setCurrentTime(t) {
+  clearAutoAdvanceTimer();
   const clamped = Math.max(0, Math.min(state.duration, t));
   if (state.usingVirtualClock) {
     state.virtualTime = clamped;
@@ -268,7 +280,7 @@ function renderSidebar() {
     const dur = estimateSceneDuration(scene);
     btn.innerHTML = `
       <span class="scene-idx">${String(idx + 1).padStart(2, "0")}</span>
-      <span class="scene-item-title">${scene.title}</span>
+      <span class="scene-item-title">${escapeHtml(scene.title)}</span>
       <span class="scene-item-dur">${fmtTime(dur)}</span>
     `;
     btn.addEventListener("click", () => {
@@ -300,6 +312,7 @@ function setChapterNextBannerVisible(show) {
   const visible = Boolean(show && !state.nextBannerDismissed && (state.nextLesson || state.isLastChapter));
   dom.chapterNextBanner.classList.toggle("visible", visible);
   dom.chapterNextBanner.setAttribute("aria-hidden", visible ? "false" : "true");
+  document.body.classList.toggle("next-banner-visible", visible);
 }
 
 function configureChapterNextBanner() {
@@ -312,7 +325,7 @@ function configureChapterNextBanner() {
     if (dom.chapterNextLink) dom.chapterNextLink.href = buildLessonSceneUrl(state.nextLesson.id, 0, ASSET_ROOT, IS_CLEAN_PAGE);
   } else if (state.isLastChapter) {
     if (dom.chapterNextKicker) dom.chapterNextKicker.textContent = "Percorso completato ✓";
-    if (dom.chapterNextTitle) dom.chapterNextTitle.textContent = "Hai completato tutti i 20 capitoli!";
+    if (dom.chapterNextTitle) dom.chapterNextTitle.textContent = "Hai completato tutti i capitoli del corso!";
     if (dom.chapterNextCta) dom.chapterNextCta.textContent = "Torna al catalogo";
     if (dom.chapterNextLink) dom.chapterNextLink.href = CATALOG_HREF;
   }
@@ -338,7 +351,7 @@ function renderCueMarkers(scene) {
     const marker = document.createElement("span");
     marker.className = `cue-marker ${cue.action === "highlight" ? "highlight" : ""}`;
     marker.style.left = `${pct}%`;
-    marker.title = `${fmtTime(cue.at)} · ${cue.action} ${cue.target}`;
+    marker.title = fmtTime(cue.at);
     dom.scrubberTrack.appendChild(marker);
   }
 }
@@ -400,7 +413,11 @@ function renderSubtitleAt(t) {
   if (!state.subtitlesOn || !state.subtitles) return;
   const segs = state.subtitles.segments;
   if (!segs || segs.length === 0) {
-    dom.subtitleBox.innerHTML = "";
+    if (state.lastSubSegIdx !== -2) {
+      dom.subtitleBox.innerHTML = "";
+      state.lastSubSegIdx = -2;
+      state.lastSubWordSpans = null;
+    }
     return;
   }
 
@@ -419,27 +436,49 @@ function renderSubtitleAt(t) {
   if (activeIdx < 0) return;
 
   const active = segs[activeIdx];
-  const nextSeg = activeIdx + 1 < segs.length ? segs[activeIdx + 1] : null;
+  const hasWords = Array.isArray(active.words) && active.words.length > 0;
 
-  let curHtml = "";
-  if (Array.isArray(active.words) && active.words.length > 0) {
-    curHtml = active.words
-      .map((w) => {
-        let cls = "upcoming";
-        if (t >= w.end) cls = "past";
-        else if (t >= w.start - 0.04) cls = "current";
-        return `<span class="subtitle-word ${cls}">${escapeHtml(w.text)}</span>`;
-      })
-      .join(" ");
-  } else {
-    curHtml = escapeHtml(active.text);
+  if (activeIdx !== state.lastSubSegIdx) {
+    const nextSeg = activeIdx + 1 < segs.length ? segs[activeIdx + 1] : null;
+
+    let curHtml = "";
+    if (hasWords) {
+      curHtml = active.words
+        .map((w) => {
+          let cls = "upcoming";
+          if (t >= w.end) cls = "past";
+          else if (t >= w.start - 0.04) cls = "current";
+          return `<span class="subtitle-word ${cls}">${escapeHtml(w.text)}</span>`;
+        })
+        .join(" ");
+    } else {
+      curHtml = escapeHtml(active.text);
+    }
+
+    const nextHtml = nextSeg
+      ? `<div class="sub-line sub-next">${escapeHtml(nextSeg.text)}</div>`
+      : `<div class="sub-line sub-next sub-empty"></div>`;
+
+    dom.subtitleBox.innerHTML = `<div class="sub-line sub-current">${curHtml}</div>${nextHtml}`;
+    state.lastSubSegIdx = activeIdx;
+    state.lastSubWordSpans = hasWords ? dom.subtitleBox.querySelectorAll(".sub-current .subtitle-word") : null;
+    return;
   }
 
-  const nextHtml = nextSeg
-    ? `<div class="sub-line sub-next">${escapeHtml(nextSeg.text)}</div>`
-    : `<div class="sub-line sub-next sub-empty"></div>`;
-
-  dom.subtitleBox.innerHTML = `<div class="sub-line sub-current">${curHtml}</div>${nextHtml}`;
+  if (hasWords && state.lastSubWordSpans) {
+    const words = active.words;
+    const spans = state.lastSubWordSpans;
+    const n = Math.min(words.length, spans.length);
+    for (let i = 0; i < n; i++) {
+      const w = words[i];
+      let cls = "subtitle-word upcoming";
+      if (t >= w.end) cls = "subtitle-word past";
+      else if (t >= w.start - 0.04) cls = "subtitle-word current";
+      if (spans[i].className !== cls) {
+        spans[i].className = cls;
+      }
+    }
+  }
 }
 
 function escapeHtml(str) {
@@ -503,10 +542,8 @@ function fitSlideScale() {
     const rect = card.getBoundingClientRect();
     if (rect.height > availH || rect.width > availW + 2) return false;
     if (card.scrollWidth > card.clientWidth + 2) return false;
-    if (z > 1) {
-      for (const el of overflowWatchEls) {
-        if (el.scrollWidth > el.clientWidth + 3) return false;
-      }
+    for (const el of overflowWatchEls) {
+      if (el.scrollWidth > el.clientWidth + 3) return false;
     }
     return true;
   };
@@ -570,6 +607,10 @@ function updateFrame(t) {
   const pct = Math.max(0, Math.min(100, (t / dur) * 100));
   dom.scrubberFill.style.width = `${pct}%`;
   dom.scrubberThumb.style.left = `${pct}%`;
+  if (dom.scrubberWrap) {
+    dom.scrubberWrap.setAttribute("aria-valuenow", String(Math.round(pct)));
+    dom.scrubberWrap.setAttribute("aria-valuetext", `${fmtTime(t)} di ${fmtTime(dur)}`);
+  }
   if (dom.timeCurrent) dom.timeCurrent.textContent = fmtTime(t);
   if (dom.timeTotal) dom.timeTotal.textContent = fmtTime(dur);
   updateIntroStage(t);
@@ -640,6 +681,7 @@ function revealCleanUiTemporarily() {
 }
 
 function play() {
+  clearAutoAdvanceTimer();
   if (state.isPlaying) return;
   state.isPlaying = true;
   updatePlayButton();
@@ -680,6 +722,7 @@ function play() {
 }
 
 function pause() {
+  clearAutoAdvanceTimer();
   state.isPlaying = false;
   updatePlayButton();
   tutorAvatar.onPause();
@@ -705,9 +748,13 @@ function onSceneEnded() {
   saveSceneProgress(LESSON_ID, state.sceneIndex, true);
   updateSidebarActive();
   if (state.autoAdvance && state.sceneIndex < state.lesson.scenes.length - 1) {
-    setTimeout(() => {
-      loadScene(state.sceneIndex + 1, true);
-    }, 550);
+    const endedScene = state.sceneIndex;
+    state.autoAdvanceTimer = setTimeout(() => {
+      state.autoAdvanceTimer = null;
+      if (state.autoAdvance && state.sceneIndex === endedScene && !state.isPlaying) {
+        loadScene(state.sceneIndex + 1, true);
+      }
+    }, 2400);
   } else if (state.sceneIndex === state.lesson.scenes.length - 1) {
     state.nextBannerDismissed = false;
     setChapterNextBannerVisible(true);
@@ -715,7 +762,10 @@ function onSceneEnded() {
 }
 
 async function loadScene(index, autoplay = false) {
+  const loadToken = ++state.sceneLoadToken;
   pause();
+  state.lastSubSegIdx = -1;
+  state.lastSubWordSpans = null;
   state.nextBannerDismissed = false;
   setChapterNextBannerVisible(false);
   const total = state.lesson.scenes.length;
@@ -769,7 +819,9 @@ async function loadScene(index, autoplay = false) {
   updateSidebarActive();
   renderCueMarkers(scene);
 
-  state.subtitles = await loadSubtitlesForScene(scene, state.duration);
+  const loadedSubs = await loadSubtitlesForScene(scene, state.duration);
+  if (loadToken !== state.sceneLoadToken) return;
+  state.subtitles = loadedSubs;
   if (state.subtitles && state.subtitles.duration > 0) {
     state.duration = state.subtitles.duration;
     renderCueMarkers(scene);
@@ -844,6 +896,23 @@ function setupScrubber() {
 
   dom.scrubberWrap.addEventListener("pointerup", endDrag);
   dom.scrubberWrap.addEventListener("pointercancel", endDrag);
+  dom.scrubberWrap.addEventListener("keydown", (e) => {
+    if (e.code === "ArrowRight") {
+      e.preventDefault();
+      e.stopPropagation();
+      setCurrentTime(getCurrentTime() + (e.shiftKey ? 10 : 5));
+    } else if (e.code === "ArrowLeft") {
+      e.preventDefault();
+      e.stopPropagation();
+      setCurrentTime(getCurrentTime() - (e.shiftKey ? 10 : 5));
+    } else if (e.code === "Home") {
+      e.preventDefault();
+      setCurrentTime(0);
+    } else if (e.code === "End") {
+      e.preventDefault();
+      setCurrentTime(state.duration);
+    }
+  });
 }
 
 function setupControls() {
@@ -860,9 +929,15 @@ function setupControls() {
     audio.playbackRate = state.playbackRate;
   });
 
+  const setPressed = (btn, pressed) => {
+    if (!btn) return;
+    btn.classList.toggle("active", Boolean(pressed));
+    btn.setAttribute("aria-pressed", String(Boolean(pressed)));
+  };
+
   dom.toggleSidebar.addEventListener("click", () => {
     const collapsed = dom.sidebar.classList.toggle("collapsed");
-    dom.toggleSidebar.classList.toggle("active", !collapsed);
+    setPressed(dom.toggleSidebar, !collapsed);
     if (!document.body.classList.contains("theater-mode")) {
       setTimeout(() => fitSlideScale(), 260);
     }
@@ -871,19 +946,22 @@ function setupControls() {
   function syncSubtitleAndAvatarDock() {
     const subsOn = state.subtitlesOn;
     const avOn = tutorAvatar.enabled;
+    const floating = !subsOn && avOn;
     dom.subtitleDock.classList.toggle("hidden", !subsOn && !avOn);
-    dom.subtitleDock.classList.toggle("subs-off-avatar-only", !subsOn && avOn);
-    tutorAvatar.setFloatingMode(!subsOn && avOn);
-    if (dom.toggleAvatar) {
-      dom.toggleAvatar.classList.toggle("active", avOn);
-    }
+    dom.subtitleDock.classList.toggle("subs-off-avatar-only", floating);
+    document.body.classList.toggle("floating-avatar-active", floating);
+    tutorAvatar.setFloatingMode(floating);
+    setPressed(dom.toggleAvatar, avOn);
   }
 
   dom.toggleSubtitles.addEventListener("click", () => {
     state.subtitlesOn = !state.subtitlesOn;
-    dom.toggleSubtitles.classList.toggle("active", state.subtitlesOn);
+    setPressed(dom.toggleSubtitles, state.subtitlesOn);
     syncSubtitleAndAvatarDock();
-    if (state.subtitlesOn) renderSubtitleAt(getCurrentTime());
+    if (state.subtitlesOn) {
+      state.lastSubSegIdx = -1;
+      renderSubtitleAt(getCurrentTime());
+    }
   });
 
   if (dom.toggleAvatar) {
@@ -912,7 +990,7 @@ function setupControls() {
     dom.toggleAvatar.dataset.tip = `Avatar ${tutorName} (V)`;
   }
 
-  const avatarAvailable = isAvatarAvailable(LESSON_ID) && tutorCfg.enabled !== false;
+  const avatarAvailable = isAvatarAvailable() && tutorCfg.enabled !== false;
   if (avatarAvailable) {
     if (dom.toggleAvatar) dom.toggleAvatar.hidden = false;
     tutorAvatar.init(true, getSavedAvatarOn());
@@ -924,7 +1002,7 @@ function setupControls() {
 
   dom.toggleRevealAll.addEventListener("click", () => {
     state.revealAll = !state.revealAll;
-    dom.toggleRevealAll.classList.toggle("active", state.revealAll);
+    setPressed(dom.toggleRevealAll, state.revealAll);
     dom.stage.classList.toggle("reveal-all-active", state.revealAll);
     updateIntroStage(getCurrentTime());
     applyCuesAt(getCurrentTime());
@@ -944,20 +1022,20 @@ function setupControls() {
       state.sidebarOpenBeforeTheater = !dom.sidebar.classList.contains("collapsed");
       document.body.classList.add("theater-mode");
       dom.sidebar.classList.add("collapsed");
-      dom.toggleSidebar.classList.remove("active");
+      setPressed(dom.toggleSidebar, false);
     } else {
       document.body.classList.remove("theater-mode");
       dom.sidebar.classList.toggle("collapsed", !state.sidebarOpenBeforeTheater);
-      dom.toggleSidebar.classList.toggle("active", state.sidebarOpenBeforeTheater);
+      setPressed(dom.toggleSidebar, state.sidebarOpenBeforeTheater);
     }
-    if (dom.toggleTheater) dom.toggleTheater.classList.toggle("active", next);
+    setPressed(dom.toggleTheater, next);
     recalcIntroOffset();
   }
 
   function setCleanMode(on) {
     const next = Boolean(on);
     document.body.classList.toggle("clean-mode", next);
-    dom.toggleClean.classList.toggle("active", next);
+    setPressed(dom.toggleClean, next);
     if (dom.cleanExitBar) dom.cleanExitBar.setAttribute("aria-hidden", next ? "false" : "true");
     if (next) {
       document.body.classList.add("clean-ui-visible");
@@ -981,19 +1059,20 @@ function setupControls() {
   dom.stage.closest(".stage-column")?.addEventListener("pointerdown", () => {
     if ((document.body.classList.contains("theater-mode") || isDrawerViewport()) && !dom.sidebar.classList.contains("collapsed")) {
       dom.sidebar.classList.add("collapsed");
-      dom.toggleSidebar.classList.remove("active");
+      setPressed(dom.toggleSidebar, false);
     }
   });
 
   // Start with sidebar collapsed on tablets and phones so slides use full width immediately
   if (isDrawerViewport()) {
     dom.sidebar.classList.add("collapsed");
-    dom.toggleSidebar.classList.remove("active");
+    setPressed(dom.toggleSidebar, false);
   }
 
   dom.toggleAutoAdvance.addEventListener("click", () => {
     state.autoAdvance = !state.autoAdvance;
-    dom.toggleAutoAdvance.classList.toggle("active", state.autoAdvance);
+    setPressed(dom.toggleAutoAdvance, state.autoAdvance);
+    if (!state.autoAdvance) clearAutoAdvanceTimer();
   });
 
   dom.toggleClean.addEventListener("click", () => {
@@ -1158,6 +1237,7 @@ function setupControls() {
 
   document.addEventListener("keydown", (e) => {
     if (state.globalSearch && state.globalSearch.isOpen()) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT" || e.target.tagName === "TEXTAREA") return;
     if (e.code === "Space") {
       e.preventDefault();
@@ -1187,6 +1267,7 @@ function setupControls() {
   });
 
   window.__SET_CLEAN_MODE__ = setCleanMode;
+  window.__SET_THEATER_MODE__ = setTheaterMode;
 }
 
 async function initPlayer() {
@@ -1204,7 +1285,7 @@ async function initPlayer() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     state.lesson = await res.json();
   } catch (err) {
-    dom.stage.innerHTML = `<div class="box box-warn"><div class="box-label">Lezione non disponibile</div><p>Impossibile caricare <code>${LESSON_BASE}/lesson.json</code>. Torna al <a href="${CATALOG_HREF}" style="text-decoration:underline">catalogo</a> o avvia il server locale.</p></div>`;
+    dom.stage.innerHTML = `<div class="box box-warn"><div class="box-label">Lezione non disponibile</div><p>Impossibile caricare <code>${escapeHtml(LESSON_BASE)}/lesson.json</code>. Torna al <a href="${escapeHtml(CATALOG_HREF)}" style="text-decoration:underline">catalogo</a> o avvia il server locale.</p></div>`;
     return;
   }
 
@@ -1254,6 +1335,7 @@ async function initPlayer() {
     play,
     pause,
     setCleanMode: (on) => window.__SET_CLEAN_MODE__?.(on),
+    setTheaterMode: (on) => window.__SET_THEATER_MODE__?.(on),
     getState: () => ({
       lessonId: state.lesson.lesson_id,
       sceneIndex: state.sceneIndex,

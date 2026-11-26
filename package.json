@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Zero-token deterministic sync polisher & 7-invariant quality gate for Lectio interactive videolessons",
+  "description": "Zero-token deterministic sync polisher, 9-invariant sync gate & headless Chrome browser gate for Lectio interactive videolessons",
   "scripts": {
     "polish": "node videolezioni/scripts/polish_sync.mjs",
     "verify": "node videolezioni/scripts/verify_sync.mjs",
-    "verify:verbose": "node videolezioni/scripts/verify_sync.mjs --verbose"
+    "verify:verbose": "node videolezioni/scripts/verify_sync.mjs --verbose",
+    "verify:browser": "node videolezioni/scripts/verify_browser.mjs",
+    "verify:all": "npm run verify && npm run verify:browser"
   },
   "dependencies": {
     "katex": "^0.16.11",

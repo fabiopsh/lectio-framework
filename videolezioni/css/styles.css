@@ -939,7 +939,7 @@ body.player-body {
 
 .metrics-row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -962,7 +962,8 @@ body.player-body {
   color: var(--ink);
 }
 
-.metric-lbl {
+.metric-lbl,
+.metric-label {
   font-size: 0.78rem;
   color: var(--ink-soft);
   margin-top: 3px;

@@ -413,6 +413,34 @@ body, .slide-frame, .topbar, .scene-sidebar, .control-bar, .subtitle-dock, .box,
   transition: background-color 280ms ease, box-shadow 300ms ease, transform 260ms var(--ease-out);
 }
 
+/* Transparent layout wrappers must NEVER paint a highlight rectangle around sibling cards */
+.grid-2.cue-highlight,
+.grid-3.cue-highlight,
+.split-visual.cue-highlight,
+.metrics-row.cue-highlight,
+.pill-strip.cue-highlight,
+.props-grid.cue-highlight,
+.proof-steps.cue-highlight,
+.flow-chain.cue-highlight,
+.formula-col.cue-highlight,
+.visual-col.cue-highlight {
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+.slide-card p {
+  border-radius: 6px;
+  transition: background-color 220ms ease, box-shadow 220ms ease;
+}
+
+p.cue-highlight {
+  padding: 4px 10px;
+  margin-left: -10px;
+  margin-right: -10px;
+  box-shadow: inset 3px 0 0 var(--blue), 0 0 0 1px var(--spotlight-ring) !important;
+  background-color: var(--blue-soft) !important;
+}
+
 /* Zero-layout-shift granular cue highlights for list steps, table rows/cells, metric pills & SVG groups */
 /* Render list markers INSIDE <li> with inline-block baseline alignment so markers never spill outside box or highlight borders at any zoom/mode */
 ol.algo-list,
@@ -527,7 +555,10 @@ td.cue-highlight {
   filter: drop-shadow(0 0 5px var(--blue-glow));
 }
 
-.diagram-svg g.cue-highlight > rect {
+.diagram-svg g.cue-highlight > rect,
+.diagram-svg g.cue-highlight > circle,
+.diagram-svg g.cue-highlight > ellipse,
+.diagram-svg g.cue-highlight > polygon {
   stroke: var(--blue) !important;
   stroke-width: 2.2 !important;
 }
@@ -538,6 +569,7 @@ td.cue-highlight {
 }
 
 :root[data-theme="carbon"] li.cue-highlight,
+:root[data-theme="carbon"] p.cue-highlight,
 :root[data-theme="carbon"] .metric-pill.cue-highlight {
   box-shadow: inset 3px 0 0 #F5B942, 0 0 0 1px rgba(245, 185, 66, 0.38) !important;
   background-color: rgba(245, 185, 66, 0.11) !important;
@@ -561,7 +593,13 @@ td.cue-highlight {
 }
 
 :root[data-theme="carbon"] .diagram-svg g.cue-highlight > rect,
-:root[data-theme="arcade"] .diagram-svg g.cue-highlight > rect {
+:root[data-theme="carbon"] .diagram-svg g.cue-highlight > circle,
+:root[data-theme="carbon"] .diagram-svg g.cue-highlight > ellipse,
+:root[data-theme="carbon"] .diagram-svg g.cue-highlight > polygon,
+:root[data-theme="arcade"] .diagram-svg g.cue-highlight > rect,
+:root[data-theme="arcade"] .diagram-svg g.cue-highlight > circle,
+:root[data-theme="arcade"] .diagram-svg g.cue-highlight > ellipse,
+:root[data-theme="arcade"] .diagram-svg g.cue-highlight > polygon {
   stroke: var(--orange) !important;
   stroke-width: 2.4 !important;
 }
@@ -572,6 +610,7 @@ td.cue-highlight {
 }
 
 :root[data-theme="arcade"] li.cue-highlight,
+:root[data-theme="arcade"] p.cue-highlight,
 :root[data-theme="arcade"] .metric-pill.cue-highlight {
   box-shadow: inset 3px 0 0 #FFD447, 0 0 0 1.5px #FFD447 !important;
   background-color: rgba(255, 212, 71, 0.14) !important;
@@ -1313,6 +1352,18 @@ td.cue-highlight {
   transform: translateY(-1px);
   transition: box-shadow 320ms var(--ease-out), opacity 320ms ease, transform 320ms var(--ease-out);
   z-index: 2;
+}
+
+.live-sync-enabled .metrics-row.spotlight-active,
+.live-sync-enabled .pill-strip.spotlight-active,
+.live-sync-enabled .props-grid.spotlight-active,
+.live-sync-enabled .flow-chain.spotlight-active,
+.live-sync-enabled .proof-steps.spotlight-active,
+.live-sync-enabled .grid-2.spotlight-active,
+.live-sync-enabled .grid-3.spotlight-active,
+.live-sync-enabled .split-visual.spotlight-active {
+  box-shadow: none;
+  transform: none;
 }
 
 .live-sync-enabled .spotlight-dim {

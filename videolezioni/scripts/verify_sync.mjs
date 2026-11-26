@@ -1,5 +1,5 @@
-// Deterministic 7-Invariant Voice-to-Slide Synchronization Quality Gate (0 LLM tokens!)
-// Verifies: introLate, deadGaps, falseMath, bogusClauses, crossBlockClauses, overlaps, katexErrs, cueErrs.
+// Deterministic 9-Invariant Voice-to-Slide Synchronization Quality Gate (0 LLM tokens!)
+// Verifies: introLate, deadGaps, falseMath, bogusClauses, crossBlockClauses, overlaps, katexErrs, cueErrs, dupIds, cueOverlaps.
 // Usage: node videolezioni/scripts/verify_sync.mjs [optional-lesson-id] [--verbose]
 
 import fs from "node:fs";
@@ -88,13 +88,17 @@ const lessons = filterLesson
   ? manifest.lessons.filter((l) => l.id === filterLesson)
   : manifest.lessons.filter((l) => l.status === "ready");
 
-const totals = { scenes: 0, introLate: 0, deadGaps: 0, falseMath: 0, bogusClauses: 0, crossBlockClauses: 0, goodClauses: 0, goodMathAtoms: 0, overlaps: 0, katexErrs: 0, cueErrs: 0 };
+const totals = { scenes: 0, introLate: 0, deadGaps: 0, falseMath: 0, bogusClauses: 0, crossBlockClauses: 0, goodClauses: 0, goodMathAtoms: 0, overlaps: 0, katexErrs: 0, cueErrs: 0, dupIds: 0, cueOverlaps: 0, metaWarns: 0 };
 
 for (const lesson of lessons) {
   const lDir = path.join(ROOT, "lessons", lesson.id);
   const lPath = path.join(lDir, "lesson.json");
   if (!fs.existsSync(lPath)) continue;
   const data = JSON.parse(fs.readFileSync(lPath, "utf8"));
+  if (typeof lesson.scenes_count === "number" && lesson.scenes_count !== data.scenes.length) {
+    totals.metaWarns++;
+    if (verbose) console.log(`  [META_WARN] ${lesson.id}: manifest scenes_count=${lesson.scenes_count} != lesson.json (${data.scenes.length})`);
+  }
   const lt = { introLate: 0, deadGaps: 0, falseMath: 0, bogusClauses: 0, crossBlockClauses: 0, goodClauses: 0, goodMathAtoms: 0, overlaps: 0 };
 
   for (const scene of data.scenes) {
@@ -107,10 +111,57 @@ for (const lesson of lessons) {
     const stage = doc.getElementById("stage");
     totals.katexErrs += renderKatexIn(stage);
 
+    // Check duplicate element IDs inside the same scene (breaks querySelector / cue targeting)
+    const seenIds = new Set();
+    for (const el of stage.querySelectorAll("[id]")) {
+      const id = el.getAttribute("id");
+      if (!id) continue;
+      if (seenIds.has(id)) {
+        totals.dupIds++;
+        if (verbose) console.log(`  [DUP_ID] ${lesson.id}/${scene.id}: duplicate id="${id}"`);
+      } else {
+        seenIds.add(id);
+      }
+    }
+
     for (const c of scene.cues || []) {
       if (stage.querySelectorAll(c.target).length === 0) {
         totals.cueErrs++;
         if (verbose) console.log(`  [CUE_MISSING] ${lesson.id}/${scene.id} @ ${c.at}s: ${c.action} "${c.target}"`);
+      }
+    }
+
+    // Check overlapping highlight cue windows on the same DOM target (mirrors player.js applyCuesAt)
+    const hlCues = (scene.cues || []).filter((c) => c.action === "highlight").sort((a, b) => a.at - b.at);
+    const hlByEl = new Map();
+    for (let i = 0; i < hlCues.length; i++) {
+      const cue = hlCues[i];
+      const next = hlCues[i + 1];
+      let endAt;
+      if (typeof cue.duration === "number" && cue.duration > 0) {
+        endAt = cue.at + cue.duration;
+      } else if (next) {
+        const gap = next.at - cue.at;
+        endAt = gap > 1.2 ? cue.at + Math.min(4.2, gap - 0.08) : cue.at + 2.4;
+      } else {
+        endAt = cue.at + 4.2;
+      }
+      for (const el of stage.querySelectorAll(cue.target)) {
+        if (!hlByEl.has(el)) hlByEl.set(el, []);
+        hlByEl.get(el).push({ start: cue.at, end: endAt, target: cue.target });
+      }
+    }
+    for (const wins of hlByEl.values()) {
+      wins.sort((a, b) => a.start - b.start);
+      for (let i = 1; i < wins.length; i++) {
+        if (wins[i].start < wins[i - 1].end - 0.15) {
+          totals.cueOverlaps++;
+          if (verbose) {
+            console.log(
+              `  [CUE_OVERLAP] ${lesson.id}/${scene.id}: "${wins[i - 1].target}" [${wins[i - 1].start.toFixed(1)}..${wins[i - 1].end.toFixed(1)}s] overlaps "${wins[i].target}" [${wins[i].start.toFixed(1)}..${wins[i].end.toFixed(1)}s]`
+            );
+          }
+        }
       }
     }
 
@@ -200,8 +251,8 @@ for (const lesson of lessons) {
 }
 
 console.log(
-  `\nTOTAL (${totals.scenes} sc): introLate=${totals.introLate} | deadGaps=${totals.deadGaps} | falseMath=${totals.falseMath} | bogusClauses=${totals.bogusClauses} | xBlock=${totals.crossBlockClauses} | goodClauses=${totals.goodClauses} | goodMath=${totals.goodMathAtoms} | ov=${totals.overlaps} | kErr=${totals.katexErrs} | cErr=${totals.cueErrs}`
+  `\nTOTAL (${totals.scenes} sc): introLate=${totals.introLate} | deadGaps=${totals.deadGaps} | falseMath=${totals.falseMath} | bogusClauses=${totals.bogusClauses} | xBlock=${totals.crossBlockClauses} | goodClauses=${totals.goodClauses} | goodMath=${totals.goodMathAtoms} | ov=${totals.overlaps} | kErr=${totals.katexErrs} | cErr=${totals.cueErrs} | dupId=${totals.dupIds} | cOv=${totals.cueOverlaps}${totals.metaWarns ? ` | metaWarn=${totals.metaWarns}` : ""}`
 );
 
-const hardFails = totals.introLate + totals.deadGaps + totals.falseMath + totals.crossBlockClauses + totals.overlaps + totals.katexErrs + totals.cueErrs;
+const hardFails = totals.introLate + totals.deadGaps + totals.falseMath + totals.crossBlockClauses + totals.overlaps + totals.katexErrs + totals.cueErrs + totals.dupIds + totals.cueOverlaps;
 if (hardFails > 0) process.exit(1);

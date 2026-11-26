@@ -77,8 +77,9 @@ python videolezioni/scripts/align_audio.py <slug>
 # 4. Auto-polish intros (<= 4.5s) & granular highlights (0 LLM tokens!)
 npm run polish
 
-# 5. Mandatory 7-invariant regression gate (MUST exit 0!)
+# 5. Mandatory 9-invariant sync gate + Headless Chrome browser gate (MUST exit 0!)
 npm run verify
+npm run verify:browser
 
 # 6. Build static site (clean URLs, Ctrl+K search-index.json, OG PNG covers)
 python videolezioni/scripts/build_pages.py
@@ -87,7 +88,7 @@ python videolezioni/scripts/build_pages.py
 python videolezioni/scripts/serve.py
 ```
 
-If `npm run verify` reports any error (`introLate`, `deadGaps`, `falseMath`, `xBlock`, `ov`, `kErr`, `cErr`), run `npm run verify:verbose`, fix the exact reported scene, and re-run `npm run verify` until **all 7 invariants = 0**.
+If `npm run verify` reports any error (`introLate`, `deadGaps`, `falseMath`, `xBlock`, `ov`, `kErr`, `cErr`, `dupId`, `cOv`), run `npm run verify:verbose`, fix the exact reported scene, and re-run `npm run verify:all` until **all sync & browser checks pass with 0 errors**.
 
 Finally, remind the user that pushing to `main` (with GitHub Pages set to **Source: GitHub Actions**) publishes the entire site automatically!
 
@@ -96,6 +97,6 @@ Finally, remind the user that pushing to `main` (with GitHub Pages set to **Sour
 ## 2. Hard Invariants (Never Break)
 
 - NEVER commit `.env` or API keys.
-- NEVER modify `videolezioni/js/live-sync.js` or `videolezioni/css/*` unless fixing a genuine framework bug (and always re-run `npm run verify` on all chapters after).
+- NEVER modify `videolezioni/js/live-sync.js` or `videolezioni/css/*` unless fixing a genuine framework bug (and always re-run `npm run verify:all` on all chapters after).
 - ALWAYS use `\gt` / `\lt` (never `&gt;` / `&lt;`) inside KaTeX `\htmlId{...}{...}`.
 - Keep `slide_html` clean, scannable, and zero-scroll at `1280×800` (see `docs/AI_AUTHORING_SPEC.md`).

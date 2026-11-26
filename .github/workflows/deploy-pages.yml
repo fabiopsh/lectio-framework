@@ -29,6 +29,20 @@ jobs:
         id: pages
         uses: actions/configure-pages@v5
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Run quality gates (sync + headless Chrome layout)
+        run: |
+          npm ci
+          npm run verify
+          if command -v google-chrome >/dev/null 2>&1 || command -v chromium >/dev/null 2>&1; then
+            npm run verify:browser
+          fi
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
